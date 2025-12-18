@@ -19,10 +19,24 @@ MODEL_DIR = 'saved_models'
 
 print("Loading models...")
 try:
-    # Load models
+    # Load main prediction models
     disaster_classifier = joblib.load(os.path.join(MODEL_DIR, 'disaster_classifier.pkl'))
     damage_regressor = joblib.load(os.path.join(MODEL_DIR, 'damage_regressor.pkl'))
     response_regressor = joblib.load(os.path.join(MODEL_DIR, 'response_time_regressor.pkl'))
+    
+    # Load parameter prediction models (for predicting severity, population, economic loss)
+    try:
+        severity_model = joblib.load(os.path.join(MODEL_DIR, 'severity_model.pkl'))
+        population_model = joblib.load(os.path.join(MODEL_DIR, 'population_model.pkl'))
+        economic_loss_model = joblib.load(os.path.join(MODEL_DIR, 'economic_loss_model.pkl'))
+        scaler_parameters = joblib.load(os.path.join(MODEL_DIR, 'scaler_parameters.pkl'))
+        print("✓ Parameter prediction models loaded")
+    except:
+        severity_model = None
+        population_model = None
+        economic_loss_model = None
+        scaler_parameters = None
+        print("⚠ Parameter prediction models not found - will require manual input")
     
     # Load scalers
     scaler_disaster = joblib.load(os.path.join(MODEL_DIR, 'scaler_disaster.pkl'))
@@ -84,15 +98,15 @@ def predict():
         location = data.get('location')
         latitude = float(data.get('latitude'))
         longitude = float(data.get('longitude'))
-        severity_level = int(data.get('severity_level'))
-        affected_population = int(data.get('affected_population'))
-        economic_loss = float(data.get('economic_loss'))
         
-        # Get current date info
+        # Get temporal parameters
         now = datetime.now()
-        month = data.get('month', now.month)
-        quarter = data.get('quarter', (month - 1) // 3 + 1)
+        month = int(data.get('month', now.month))
+        week = int(data.get('week', 1))
+        quarter = (month - 1) // 3 + 1
         day_of_year = data.get('day_of_year', now.timetuple().tm_yday)
+        is_summer = 1 if month in [6, 7, 8] else 0
+        is_winter = 1 if month in [12, 1, 2] else 0
         
         # Encode categorical variables
         try:
@@ -104,6 +118,26 @@ def predict():
             location_encoded = le_location.transform([location])[0]
         except:
             location_encoded = 0
+        
+        # Predict missing parameters if models are available
+        if severity_model and population_model and economic_loss_model:
+            # Prepare features for parameter prediction
+            param_features = np.array([[
+                disaster_encoded, location_encoded,
+                latitude, longitude,
+                month, week, quarter, is_summer, is_winter
+            ]])
+            param_features_scaled = scaler_parameters.transform(param_features)
+            
+            # Predict parameters
+            severity_level = max(1, min(10, int(severity_model.predict(param_features_scaled)[0])))
+            affected_population = max(0, int(population_model.predict(param_features_scaled)[0]))
+            economic_loss = max(0, float(economic_loss_model.predict(param_features_scaled)[0]))
+        else:
+            # Use provided values or defaults
+            severity_level = int(data.get('severity_level', 5))
+            affected_population = int(data.get('affected_population', 10000))
+            economic_loss = float(data.get('economic_loss', 1000000))
         
         # Prepare input for major disaster prediction
         disaster_input = np.array([[

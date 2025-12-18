@@ -52,15 +52,6 @@ async function loadModelInfo() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Severity level slider
-    const severitySlider = document.getElementById('severityLevel');
-    const severityValue = document.getElementById('severityValue');
-    
-    severitySlider.addEventListener('input', (e) => {
-        severityValue.textContent = e.target.value;
-        severityValue.style.color = getSeverityColor(parseInt(e.target.value));
-    });
-    
     // Form submission
     const form = document.getElementById('predictionForm');
     form.addEventListener('submit', handleFormSubmit);
@@ -81,16 +72,16 @@ async function handleFormSubmit(e) {
     // Show loading state
     document.getElementById('loadingSpinner').style.display = 'block';
     document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('predictedParamsSection').style.display = 'none';
     
-    // Collect form data
+    // Collect form data - only the 6 inputs from the form
     const formData = {
         disaster_type: document.getElementById('disasterType').value,
         location: document.getElementById('location').value,
         latitude: parseFloat(document.getElementById('latitude').value),
         longitude: parseFloat(document.getElementById('longitude').value),
-        severity_level: parseInt(document.getElementById('severityLevel').value),
-        affected_population: parseInt(document.getElementById('affectedPopulation').value),
-        economic_loss: parseFloat(document.getElementById('economicLoss').value)
+        month: parseInt(document.getElementById('month').value),
+        week: parseInt(document.getElementById('week').value)
     };
     
     try {
@@ -108,8 +99,23 @@ async function handleFormSubmit(e) {
         
         const result = await response.json();
         
-        // Hide loading, show results
+        // Hide loading
         document.getElementById('loadingSpinner').style.display = 'none';
+        
+        // Show predicted parameters if available
+        if (result.input && result.input.severity_level) {
+            const paramsSection = document.getElementById('predictedParamsSection');
+            paramsSection.style.display = 'block';
+            
+            document.getElementById('predictedSeverity').textContent = 
+                `${result.input.severity_level}/10`;
+            document.getElementById('predictedPopulation').textContent = 
+                result.input.affected_population.toLocaleString();
+            document.getElementById('predictedLoss').textContent = 
+                `$${result.input.economic_loss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        
+        // Show results
         displayResults(result);
         
     } catch (error) {
