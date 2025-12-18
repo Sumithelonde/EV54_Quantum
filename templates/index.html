@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Disaster Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🌍 AI-Powered Disaster Prediction System</h1>
+                <p class="subtitle">Emergency Response Decision Support Platform</p>
+            </div>
+            <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                <span>System Online</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Input Form -->
+            <div class="card form-card">
+                <h2>📊 Disaster Information Input</h2>
+                <form id="predictionForm">
+                    <div class="form-grid">
+                        <!-- Disaster Type -->
+                        <div class="form-group">
+                            <label for="disasterType">Disaster Type *</label>
+                            <select id="disasterType" name="disaster_type" required>
+                                <option value="">Select disaster type...</option>
+                            </select>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="form-group">
+                            <label for="location">Location *</label>
+                            <select id="location" name="location" required>
+                                <option value="">Select location...</option>
+                            </select>
+                        </div>
+
+                        <!-- Latitude -->
+                        <div class="form-group">
+                            <label for="latitude">Latitude *</label>
+                            <input type="number" id="latitude" name="latitude" step="0.0001" min="-90" max="90" required placeholder="e.g., 35.6762">
+                        </div>
+
+                        <!-- Longitude -->
+                        <div class="form-group">
+                            <label for="longitude">Longitude *</label>
+                            <input type="number" id="longitude" name="longitude" step="0.0001" min="-180" max="180" required placeholder="e.g., 139.6503">
+                        </div>
+
+                        <!-- Severity Level -->
+                        <div class="form-group">
+                            <label for="severityLevel">Severity Level (1-10) *</label>
+                            <input type="range" id="severityLevel" name="severity_level" min="1" max="10" value="5" required>
+                            <div class="range-value" id="severityValue">5</div>
+                        </div>
+
+                        <!-- Affected Population -->
+                        <div class="form-group">
+                            <label for="affectedPopulation">Affected Population *</label>
+                            <input type="number" id="affectedPopulation" name="affected_population" min="0" required placeholder="e.g., 50000">
+                        </div>
+
+                        <!-- Economic Loss -->
+                        <div class="form-group full-width">
+                            <label for="economicLoss">Estimated Economic Loss (USD) *</label>
+                            <input type="number" id="economicLoss" name="economic_loss" min="0" step="1000" required placeholder="e.g., 15000000">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="predictBtn">
+                        <span class="btn-icon">🔮</span>
+                        Generate Prediction
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing disaster scenario...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <!-- Prediction Results Card -->
+                <div class="card result-card">
+                    <h2>🎯 Prediction Results</h2>
+                    <div class="prediction-grid">
+                        <div class="prediction-item">
+                            <div class="prediction-label">Major Disaster Classification</div>
+                            <div class="prediction-value" id="isMajor">-</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Major Disaster Probability</div>
+                            <div class="prediction-value" id="majorProb">-</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Infrastructure Damage Index</div>
+                            <div class="prediction-value" id="damageIndex">-</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-label">Recommended Response Time</div>
+                            <div class="prediction-value" id="responseTime">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Response Card -->
+                <div class="card emergency-card">
+                    <h2>⚡ Emergency Response Plan</h2>
+                    
+                    <!-- Priority Alert -->
+                    <div class="alert-banner" id="alertBanner">
+                        <div class="alert-priority" id="alertPriority">-</div>
+                        <div class="alert-level" id="alertLevel">-</div>
+                    </div>
+
+                    <!-- Resources -->
+                    <div class="resources-section">
+                        <h3>📦 Recommended Resource Allocation</h3>
+                        <div class="resource-grid">
+                            <div class="resource-item">
+                                <span class="resource-icon">👥</span>
+                                <div class="resource-details">
+                                    <div class="resource-label">Personnel</div>
+                                    <div class="resource-value" id="personnel">-</div>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-icon">🏥</span>
+                                <div class="resource-details">
+                                    <div class="resource-label">Medical Teams</div>
+                                    <div class="resource-value" id="medicalTeams">-</div>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-icon">🚁</span>
+                                <div class="resource-details">
+                                    <div class="resource-label">Rescue Units</div>
+                                    <div class="resource-value" id="rescueUnits">-</div>
+                                </div>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-icon">🏕️</span>
+                                <div class="resource-details">
+                                    <div class="resource-label">Temporary Shelters</div>
+                                    <div class="resource-value" id="shelters">-</div>
+                                </div>
+                            </div>
+                            <div class="resource-item full-width">
+                                <span class="resource-icon">🚧</span>
+                                <div class="resource-details">
+                                    <div class="resource-label">Equipment</div>
+                                    <div class="resource-value" id="equipment">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evacuation -->
+                    <div class="evacuation-section" id="evacuationSection" style="display: none;">
+                        <h3>🚨 Evacuation Recommendation</h3>
+                        <div class="evacuation-details">
+                            <p><strong>People to Evacuate:</strong> <span id="evacuationPeople">-</span></p>
+                            <p><strong>Evacuation Centers:</strong> <span id="evacuationCenters">-</span></p>
+                            <p><strong>Vehicles Required:</strong> <span id="evacuationVehicles">-</span> buses/vehicles</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Items -->
+                    <div class="action-items">
+                        <h3>✅ Immediate Action Items</h3>
+                        <ul id="actionItemsList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>AI-Powered Disaster Prediction System | Model Version 1.0.0</p>
+            <p id="modelInfo" class="model-info">Loading model information...</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
