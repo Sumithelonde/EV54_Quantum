@@ -21,7 +21,7 @@ A full-stack machine learning application that predicts disaster impacts and pro
 
 1. **Clone or navigate to the project directory**
    ```bash
-   cd "d:\Envision 25-26\ML model\for-sapate"
+   cd "d:\Envision 25-26\new ml model\EV54_Quantum"
    ```
 
 2. **Create a virtual environment (recommended)**
@@ -56,13 +56,18 @@ A full-stack machine learning application that predicts disaster impacts and pro
 ## 📁 Project Structure
 
 ```
-for-sapate/
-├── app.py                      # Flask backend API
-├── requirements.txt            # Python dependencies
-├── README.md                   # This file
-├── model.ipynb                # Jupyter notebook with model training
-├── Disaster_Dataset .csv      # Training dataset
-├── saved_models/              # Trained ML models
+EV54_Quantum/
+├── app.py                                  # Flask backend API
+├── requirements.txt                        # Python dependencies
+├── README.md                               # This file
+├── .gitignore                              # Git ignore file
+├── model.ipynb                             # Main ML model training notebook
+├── data_preprocessing.ipynb                # Data preprocessing notebook
+├── Preprocessed data ENVISION ROUND 1.csv  # Training dataset
+├── test_api.py                             # API testing script
+├── test_models.py                          # Model testing script
+├── train_params_quick.py                   # Quick training parameters script
+├── saved_models/                           # Trained ML models
 │   ├── disaster_classifier.pkl
 │   ├── damage_regressor.pkl
 │   ├── response_time_regressor.pkl
@@ -73,9 +78,9 @@ for-sapate/
 │   ├── label_encoder_location.pkl
 │   ├── label_encoder_aid.pkl
 │   └── model_metadata.pkl
-├── templates/                 # HTML templates
+├── templates/                              # HTML templates
 │   └── index.html
-└── static/                    # Static assets
+└── static/                                 # Static assets
     ├── style.css
     └── script.js
 ```
