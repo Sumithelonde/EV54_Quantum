@@ -1,4 +1,4 @@
-# 🌍 AI-Powered Disaster Prediction System
+# EV54_Quantum - AI-Powered Disaster Prediction System
 
 A full-stack machine learning application that predicts disaster impacts and provides emergency response recommendations using trained Random Forest models.
 
